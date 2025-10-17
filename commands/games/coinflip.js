@@ -36,7 +36,7 @@ module.exports = {
         
         const embed = new EmbedBuilder()
             .setColor(0xFFD700)
-            .setTitle('🪙 翻硬幣結果')
+            .setTitle('🪙 Salt 的翻硬幣結果にゃ')
             .setDescription(getCoinAnimation(count));
         
         if (count === 1) {
@@ -60,8 +60,8 @@ module.exports = {
                         inline: true
                     },
                     {
-                        name: '📊 結果',
-                        value: isCorrect ? '🎉 猜對了！' : '😅 猜錯了！',
+                        name: '📊 Salt 的判定',
+                        value: isCorrect ? '🎉 Salt 說你猜對了にゃ！' : '😅 Salt 說你猜錯了にゃ！',
                         inline: true
                     }
                 );
@@ -71,7 +71,7 @@ module.exports = {
             
             // 添加趣味元素
             embed.addFields({
-                name: '🎭 趣味',
+                name: '🎭 Salt 的小知識',
                 value: getFunFact(),
                 inline: false
             });
@@ -99,7 +99,7 @@ module.exports = {
             const specialPattern = checkSpecialPattern(results);
             if (specialPattern) {
                 embed.addFields({
-                    name: '✨ 特殊模式',
+                    name: '✨ Salt 發現特殊模式',
                     value: specialPattern,
                     inline: false
                 });
@@ -111,15 +111,15 @@ module.exports = {
                 const accuracy = (correctGuesses / count * 100).toFixed(1);
                 
                 embed.addFields({
-                    name: '🔮 猜測準確率',
-                    value: `${correctGuesses}/${count} (${accuracy}%)`,
+                    name: '🔮 Salt 的準確率統計',
+                    value: `${correctGuesses}/${count} (${accuracy}%) にゃ`,
                     inline: true
                 });
             }
         }
         
         embed.setFooter({ 
-            text: `由 ${interaction.user.username} 翻擲`, 
+            text: `由 ${interaction.user.username} 和 Salt 一起翻擲にゃ`, 
             iconURL: interaction.user.displayAvatarURL() 
         })
         .setTimestamp();
@@ -130,14 +130,14 @@ module.exports = {
 
 function getCoinAnimation(count) {
     const animations = [
-        '🪙 *硬幣在空中旋轉...*',
-        '🪙 *硬幣高高拋起...*',
-        '🪙 *命運之幣翻滾中...*',
-        '🪙 *硬幣即將落地...*'
+        '🪙 *Salt 幫你把硬幣拋到空中にゃ...*',
+        '🪙 *Salt 看著硬幣高高拋起にゃ...*',
+        '🪙 *Salt 說命運之幣翻滾中にゃ...*',
+        '🪙 *Salt 等硬幣即將落地にゃ...*'
     ];
     
     if (count > 1) {
-        return `🪙 *${count} 枚硬幣同時拋起...*`;
+        return `🪙 *Salt 幫你把 ${count} 枚硬幣同時拋起にゃ...*`;
     }
     
     return animations[Math.floor(Math.random() * animations.length)];
@@ -145,14 +145,14 @@ function getCoinAnimation(count) {
 
 function getFunFact() {
     const facts = [
-        '硬幣翻面的機率理論上是 50%',
-        '世界上第一枚硬幣出現在公元前 7 世紀',
-        '有些人可以用技巧影響硬幣翻面的結果',
-        '在某些文化中，硬幣被認為帶有神奇力量',
-        '翻硬幣是解決二選一問題的經典方法',
-        '據說愛因斯坦不相信隨機性，但硬幣翻面確實是隨機的',
-        '有研究顯示硬幣可能有微小的偏向性',
-        '古羅馬人用"heads or ships"來決定事情'
+        'Salt 說硬幣翻面的機率理論上是 50% にゃ',
+        'Salt 知道世界上第一枚硬幣出現在公元前 7 世紀にゃ',
+        'Salt 聽說有些人可以用技巧影響硬幣翻面的結果にゃ',
+        'Salt 說在某些文化中，硬幣被認為帶有神奇力量にゃ',
+        'Salt 覺得翻硬幣是解決二選一問題的經典方法にゃ',
+        'Salt 知道愛因斯坦不相信隨機性，但硬幣翻面確實是隨機的にゃ',
+        'Salt 聽說有研究顯示硬幣可能有微小的偏向性にゃ',
+        'Salt 說古羅馬人用"heads or ships"來決定事情にゃ'
     ];
     
     return facts[Math.floor(Math.random() * facts.length)];
@@ -164,7 +164,7 @@ function checkSpecialPattern(results) {
     // 全部相同
     if (results.every(r => r === results[0])) {
         const type = results[0] === 'heads' ? '正面' : '反面';
-        return `🎊 全部都是${type}！機率只有 ${(Math.pow(0.5, results.length) * 100).toFixed(2)}%`;
+        return `🎊 Salt 發現全部都是${type}にゃ！機率只有 ${(Math.pow(0.5, results.length) * 100).toFixed(2)}% にゃ`;
     }
     
     // 完美交替
@@ -177,7 +177,7 @@ function checkSpecialPattern(results) {
     }
     
     if (isAlternating && results.length > 2) {
-        return '🎨 完美交替模式！非常罕見！';
+        return '🎨 Salt 說完美交替模式にゃ！非常罕見にゃ！';
     }
     
     // 檢查連續
@@ -204,7 +204,7 @@ function checkSpecialPattern(results) {
     
     if (maxStreak >= 4) {
         const type = streakType === 'heads' ? '正面' : '反面';
-        return `🔥 ${type}連續 ${maxStreak} 次！超級幸運！`;
+        return `🔥 Salt 發現${type}連續 ${maxStreak} 次にゃ！超級幸運にゃ！`;
     }
     
     return null;

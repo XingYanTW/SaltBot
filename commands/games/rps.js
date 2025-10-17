@@ -125,7 +125,7 @@ function createResultEmbed(userChoice, botChoice, outcome, user) {
                 inline: true 
             },
             { 
-                name: '🤖 機器人的選擇', 
+                name: '🤖 Salt 的選擇', 
                 value: `${choiceEmojis[botChoice]} ${choiceNames[botChoice]}`, 
                 inline: true 
             },

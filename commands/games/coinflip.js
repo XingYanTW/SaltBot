@@ -157,7 +157,6 @@ function getFunFact() {
     
     return facts[Math.floor(Math.random() * facts.length)];
 }
-
 function checkSpecialPattern(results) {
     const resultString = results.join('');
     

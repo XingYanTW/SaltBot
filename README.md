@@ -65,7 +65,7 @@ Salt Bot 完全體現了 maimai DX 中 Salt 角色的可愛個性：
 
 ### 1. 複製專案
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/XingYanTW/SaltBot.git
 cd SaltBot
 ```
 

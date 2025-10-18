@@ -7,12 +7,17 @@
     "start": "node index.js",
     "dev": "node --watch index.js"
   },
-  "keywords": ["discord", "bot", "discord.js"],
+  "keywords": [
+    "discord",
+    "bot",
+    "discord.js"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "discord.js": "^14.14.1",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "^20.10.0"

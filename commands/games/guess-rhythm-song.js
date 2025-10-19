@@ -3,6 +3,10 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 // 遊戲狀態儲存
 const activeGames = new Map();
 
+// 追蹤最近使用過的歌曲，避免重複（保存最近 50 首歌曲）
+const recentlyUsedSongs = new Set();
+const MAX_RECENT_SONGS = 50;
+
 // 從 maimai API 獲取歌曲資料
 async function getMaimaiSongs() {
     try {
@@ -158,6 +162,17 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply();
         
+        // 檢查此頻道是否已有進行中的遊戲
+        const existingGame = Array.from(activeGames.entries()).find(([gameId, game]) => 
+            game.channelId === interaction.channel.id && !game.isComplete
+        );
+        
+        if (existingGame) {
+            return await interaction.editReply({
+                content: `❌ Salt 說這個頻道已經有一個進行中的遊戲了にゃ！\n🎮 遊戲ID: \`${existingGame[0]}\`\n💡 請等待當前遊戲結束，或讓遊戲創建者使用放棄按鈕結束遊戲にゃ～`
+            });
+        }
+        
         const difficulty = interaction.options.getString('difficulty') || 'random';
         const genreFilter = interaction.options.getString('genre') || 'all';
         const gameId = `${interaction.user.id}_${Date.now()}`;
@@ -183,19 +198,14 @@ module.exports = {
                 availableSongs = availableSongs.filter(song => song.difficulty === difficulty);
             }
             
-            // 優先選擇包含英文字母的歌曲，如果數量足夠的話
-            const songsWithEnglish = availableSongs.filter(song => hasEnglishLetters(song.name));
-            if (songsWithEnglish.length >= 5) {
-                availableSongs = songsWithEnglish;
-            }
-            
+            // 確保有足夠的歌曲
             if (availableSongs.length < 5) {
                 return await interaction.editReply({
                     content: '❌ Salt 找不到足夠的 maimai 原創曲目（需要至少 5 首）にゃ！\n💡 Salt 只使用 maimai 遊戲的原創音樂にゃ～\n🎵 這些都是專門為 maimai 創作的獨家曲目にゃ！'
                 });
             }
             
-            // 隨機選擇 5 首歌曲
+            // 智能選擇 5 首歌曲，避免重複並確保多樣性
             const selectedSongs = getRandomSongs(availableSongs, 5);
             
             // 儲存遊戲狀態
@@ -240,10 +250,44 @@ function getRandomSongs(songs, count) {
     const songsWithEnglish = songs.filter(song => hasEnglishLetters(song.name));
     
     // 如果過濾後的歌曲不夠，回退到原始歌曲列表
-    const finalSongs = songsWithEnglish.length >= count ? songsWithEnglish : songs;
+    let availableSongs = songsWithEnglish.length >= count ? songsWithEnglish : songs;
     
-    const shuffled = [...finalSongs].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, count);
+    // 過濾掉最近使用過的歌曲
+    const nonRecentSongs = availableSongs.filter(song => !recentlyUsedSongs.has(song.name));
+    
+    // 如果過濾後的歌曲不夠，使用所有可用歌曲
+    if (nonRecentSongs.length < count) {
+        console.log(`Salt 說：最近使用歌曲太多，使用全部歌曲池にゃ (需要 ${count} 首，非重複有 ${nonRecentSongs.length} 首)`);
+        availableSongs = availableSongs;
+    } else {
+        availableSongs = nonRecentSongs;
+        console.log(`Salt 說：成功避免重複，從 ${availableSongs.length} 首非重複歌曲中選擇にゃ`);
+    }
+    
+    // 改進的隨機選擇算法 - 使用 Fisher-Yates 洗牌算法
+    const shuffled = [...availableSongs];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    
+    const selectedSongs = shuffled.slice(0, count);
+    
+    // 將選中的歌曲添加到最近使用列表
+    selectedSongs.forEach(song => {
+        recentlyUsedSongs.add(song.name);
+    });
+    
+    // 如果最近使用的歌曲超過限制，移除最舊的（FIFO）
+    if (recentlyUsedSongs.size > MAX_RECENT_SONGS) {
+        const songsArray = Array.from(recentlyUsedSongs);
+        const toRemove = songsArray.slice(0, recentlyUsedSongs.size - MAX_RECENT_SONGS);
+        toRemove.forEach(songName => recentlyUsedSongs.delete(songName));
+        console.log(`Salt 說：清理了 ${toRemove.length} 首舊歌曲，保持歌曲池新鮮にゃ`);
+    }
+    
+    console.log(`Salt 說：選擇了 ${selectedSongs.length} 首歌曲，目前記錄 ${recentlyUsedSongs.size} 首最近使用歌曲にゃ`);
+    return selectedSongs;
 }
 
 function createMaskedSongName(songName, revealedLetters, isGuessed = false) {
@@ -389,9 +433,15 @@ function getGenreEmoji(genre) {
     return genreEmojis[genre] || '🎵';
 }
 
-function checkGameComplete(songs, revealedLetters) {
-    return songs.every(song => {
-        const maskedName = createMaskedSongName(song.name, revealedLetters, false); // 不算已猜中的歌曲
+function checkGameComplete(songs, revealedLetters, guessedSongs = new Set()) {
+    return songs.every((song, index) => {
+        // 如果歌曲已經被猜中，直接返回 true
+        if (guessedSongs.has(index)) {
+            return true;
+        }
+        
+        // 否則檢查歌曲是否完全解開
+        const maskedName = createMaskedSongName(song.name, revealedLetters, false);
         return !maskedName.includes('_');
     });
 }
@@ -435,9 +485,27 @@ function getExtraHint(songData) {
     return extraHints[songData.answer] || `這首歌的作曲家是 ${songData.artist} にゃ～`;
 }
 
+// 清理最近使用歌曲列表的函數
+function clearRecentSongs() {
+    recentlyUsedSongs.clear();
+    console.log('Salt 說：最近使用歌曲列表已清空にゃ！');
+}
+
+// 獲取最近使用歌曲統計的函數
+function getRecentSongsStats() {
+    return {
+        count: recentlyUsedSongs.size,
+        maxCount: MAX_RECENT_SONGS,
+        songs: Array.from(recentlyUsedSongs)
+    };
+}
+
 // 匯出函數供其他指令使用
 module.exports.activeGames = activeGames;
 module.exports.getExtraHint = getExtraHint;
 module.exports.createGameComponents = createGameComponents;
 module.exports.createGameEmbed = createGameEmbed;
 module.exports.isSongFullyRevealed = isSongFullyRevealed;
+module.exports.checkGameComplete = checkGameComplete;
+module.exports.clearRecentSongs = clearRecentSongs;
+module.exports.getRecentSongsStats = getRecentSongsStats;

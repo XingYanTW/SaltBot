@@ -10,11 +10,11 @@ module.exports = {
                 .setDescription('推薦類型')
                 .setRequired(false)
                 .addChoices(
-                    { name: '🌅 晨練 (簡單)', value: 'morning' },
-                    { name: '☀️ 日常 (中等)', value: 'daily' },
-                    { name: '🌙 夜戰 (困難)', value: 'night' },
-                    { name: '💀 地獄 (最高難度)', value: 'hell' },
-                    { name: '🎲 隨機', value: 'random' }
+                    { name: '🌅 晨練 (Lv.1-8 新手友好)', value: 'morning' },
+                    { name: '☀️ 日常 (Lv.7-12 中等挑戰)', value: 'daily' },
+                    { name: '🌙 夜戰 (Lv.12-14 高手專區)', value: 'night' },
+                    { name: '💀 地獄 (Lv.14+ 頂尖挑戰)', value: 'hell' },
+                    { name: '🎲 隨機 (全難度)', value: 'random' }
                 )),
     async execute(interaction) {
         await interaction.deferReply();
@@ -139,19 +139,23 @@ function getDailyRecommendation(songs, type, seed) {
     let filteredSongs = [...songs];
     let levelFilter = null;
     
-    // 根據類型篩選歌曲
+    // 根據類型篩選歌曲 - 考慮到高難度定數差距更大
     switch (type) {
         case 'morning':
-            levelFilter = chart => chart.level >= 1 && chart.level <= 7;
+            // 簡單：1-8級，適合新手和暖身
+            levelFilter = chart => chart.level >= 1 && chart.level <= 8;
             break;
         case 'daily':
-            levelFilter = chart => chart.level >= 6 && chart.level <= 11;
+            // 日常：7-12級，中等難度，定數差距適中
+            levelFilter = chart => chart.level >= 7 && chart.level <= 12;
             break;
         case 'night':
-            levelFilter = chart => chart.level >= 10 && chart.level <= 13;
+            // 夜戰：12-14級，高難度，定數差距開始變大
+            levelFilter = chart => chart.level >= 12 && chart.level <= 14;
             break;
         case 'hell':
-            levelFilter = chart => chart.level >= 13;
+            // 地獄：14級以上，超高難度，定數差距極大
+            levelFilter = chart => chart.level >= 14;
             break;
         case 'random':
         default:
@@ -203,45 +207,111 @@ function getTypeEmoji(type) {
 
 function getTypeDescription(type) {
     const descriptions = {
-        morning: '早晨時光，來點輕鬆的暖身運動！',
-        daily: '日常練習，保持手感的好選擇！',
-        night: '夜深人靜，挑戰困難譜面的時刻！',
-        hell: '地獄模式，只有真正的大師才能征服！',
-        random: '隨機推薦，命運選擇的歌曲！'
+        morning: '早晨時光，新手友好的暖身運動！適合練習基礎技巧。',
+        daily: '日常練習，穩定進步的好選擇！定數分布較為均勻。',
+        night: '夜深人靜，高手的戰場！定數差距開始拉大，每一級都是挑戰！',
+        hell: '地獄模式，頂尖玩家的試煉！定數差距極大，同級別內實力差異巨大！',
+        random: '隨機推薦，命運選擇的歌曲！體驗各種難度的樂趣！'
     };
     return descriptions[type] || '今日推薦歌曲';
 }
 
 function getDailyChallenge(chart, seed) {
-    const challenges = [
-        `🎯 目標：達成 ${95 + (seed % 5)}% 以上的準確率`,
-        `⚡ 挑戰：不使用技能道具完成`,
-        `🏃 速度：以 ${0.5 + (seed % 4) * 0.5}x 倍速完成`,
-        `💎 完美：嘗試取得全 Perfect`,
-        `🔥 連擊：保持 300+ 連擊`,
-        `⭐ 評級：目標達成 S 以上評級`,
-        `🎪 風格：使用不同的按鍵風格遊玩`,
-        `👥 合作：和朋友一起遊玩並比較成績`
-    ];
+    // 根據難度等級調整挑戰目標
+    const level = chart.level;
+    let challenges = [];
+    
+    if (level <= 8) {
+        // 低難度：重點在學習和熟練
+        challenges = [
+            `🎯 目標：達成 ${97 + (seed % 3)}% 以上的準確率`,
+            `💎 完美：嘗試取得 80% 以上 Perfect`,
+            `⭐ 評級：目標達成 S 以上評級`,
+            `� 節奏：專注於跟上音樂節拍`,
+            `📚 學習：熟悉基本的手法模式`
+        ];
+    } else if (level <= 12) {
+        // 中難度：平衡準確率和技巧
+        challenges = [
+            `🎯 目標：達成 ${95 + (seed % 4)}% 以上的準確率`,
+            `⚡ 挑戰：不使用技能道具完成`,
+            `💎 完美：嘗試取得全 Perfect`,
+            `🔥 連擊：保持 500+ 連擊`,
+            `⭐ 評級：目標達成 SS 以上評級`
+        ];
+    } else if (level <= 14) {
+        // 高難度：定數差距大，重點在突破
+        challenges = [
+            `🎯 目標：達成 ${92 + (seed % 5)}% 以上的準確率`,
+            `🔥 連擊：嘗試保持 300+ 連擊（高難度下已是成就）`,
+            `⭐ 評級：目標達成 S 評級（高難度下相當困難）`,
+            `💪 毅力：完成整首歌曲不放棄`,
+            `🧠 策略：找出困難段落並重點練習`
+        ];
+    } else {
+        // 超高難度：定數差距極大，能完成就是勝利
+        challenges = [
+            `� 生存：完成整首歌曲就是勝利！`,
+            `🎯 目標：達成 ${85 + (seed % 8)}% 以上的準確率`,
+            `� 挑戰：突破個人最佳成績`,
+            `🔥 連擊：任何長連擊都值得慶祝`,
+            `🧠 分析：研究譜面模式和節奏變化`,
+            `⏰ 耐心：多次嘗試，每次都有進步`
+        ];
+    }
     
     return challenges[seed % challenges.length];
 }
 
 function getPracticeTip(chart, type) {
-    const baseTips = [
-        '先聽一遍音樂熟悉節奏',
-        '從較低難度開始練習',
-        '注意手部姿勢和放鬆',
-        '專注於準確度而非速度',
-        '定期休息避免疲勞'
-    ];
+    const level = chart.level;
+    let baseTips = [];
+    
+    if (level <= 8) {
+        // 低難度練習建議
+        baseTips = [
+            '先聽一遍音樂熟悉節奏和結構',
+            '注意基本手部姿勢和按鍵力度',
+            '專注於準確度，速度會自然提升',
+            '多練習基本的 Tap 和 Hold 手法',
+            '觀察音符與音樂的對應關係'
+        ];
+    } else if (level <= 12) {
+        // 中難度練習建議
+        baseTips = [
+            '分段練習，先征服困難的部分',
+            '注意 Slide 的方向和時機',
+            '練習多指協調和手指獨立性',
+            '熟悉常見的節奏模式和組合',
+            '保持穩定的心率和呼吸'
+        ];
+    } else if (level <= 14) {
+        // 高難度練習建議
+        baseTips = [
+            '同級別內定數差距大，需要循序漸進',
+            '重點攻克技術難點，如複雜 Slide 組合',
+            '練習快速的手指切換和位置記憶',
+            '學會預讀譜面，提前準備手位',
+            '接受失敗，每次進步都值得肯定'
+        ];
+    } else {
+        // 超高難度練習建議
+        baseTips = [
+            '定數差距極大！14.0 和 15.0 是完全不同的世界',
+            '需要長期練習和技術積累',
+            '專注於特定技術的專項訓練',
+            '觀看高手的遊玩影片學習技巧',
+            '保持耐心，突破需要時間和毅力',
+            '適當休息，避免過度練習造成疲勞'
+        ];
+    }
     
     const levelTips = {
-        morning: '適合練習基本技巧和手感',
-        daily: '可以專注於提升準確度',
-        night: '需要高度集中注意力',
-        hell: '建議分段練習困難部分',
-        random: '保持開放心態，享受音樂'
+        morning: '新手友好區域，重點學習基礎',
+        daily: '穩步提升，追求精確和穩定',
+        night: '高手挑戰，需要技術和經驗並重',
+        hell: '頂尖玩家的領域，每一個等級都是巨大的挑戰',
+        random: '保持開放心態，享受各種難度的樂趣'
     };
     
     const tipIndex = chart.level % baseTips.length;

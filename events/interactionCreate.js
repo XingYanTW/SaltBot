@@ -103,6 +103,8 @@ module.exports = {
                     .setFooter({ text: 'Salt 說學習新歌曲也是很棒的にゃ～' })
                     .setTimestamp();
                 
+                // 標記遊戲為完成並刪除
+                game.isComplete = true;
                 guessRhythmGame.activeGames.delete(gameId);
                 await interaction.update({ embeds: [embed], components: [] });
                 return;
@@ -216,6 +218,8 @@ module.exports = {
                     .setFooter({ text: 'Salt 說學習新歌曲也是很棒的にゃ～' })
                     .setTimestamp();
                 
+                // 標記遊戲為完成並刪除
+                game.isComplete = true;
                 guessRhythmGame.activeGames.delete(gameId);
                 await interaction.update({ embeds: [embed], components: [] });
                 return;

@@ -54,6 +54,8 @@ async function handleSongAnswerModal(interaction) {
                 .setFooter({ text: 'Salt 說你對音樂很有品味にゃ～' })
                 .setTimestamp();
             
+            // 標記遊戲為完成並刪除
+            game.isComplete = true;
             guessRhythmGame.activeGames.delete(gameId);
             await interaction.reply({ embeds: [finalEmbed], ephemeral: false });
             return;
@@ -90,7 +92,7 @@ async function handleSongAnswerModal(interaction) {
         
     } else {
         await interaction.reply({
-            content: `❌ Salt 說答錯了にゃ～正確答案是 **${targetSong.name}** にゃ！\n💡 ${targetSong.hint}`,
+            content: `❌ Salt 說答錯了にゃ～再想想看吧にゃ！\n💡 提示：${targetSong.hint}`,
             ephemeral: true
         });
     }

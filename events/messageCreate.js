@@ -52,6 +52,8 @@ async function handleGameMessage(message, gameId, game) {
             .setFooter({ text: 'Salt 說學習新歌曲也是很棒的にゃ～' })
             .setTimestamp();
         
+        // 標記遊戲為完成並刪除
+        game.isComplete = true;
         guessRhythmGame.activeGames.delete(gameId);
         await message.reply({ embeds: [embed] });
         return;
@@ -79,8 +81,12 @@ async function handleGameMessage(message, gameId, game) {
         if (letterFound) {
             game.revealedLetters.add(letter);
             
-            // 檢查是否完成遊戲
-            const isGameComplete = checkGameComplete(game.songs, game.revealedLetters);
+            // 檢查是否完成遊戲 - 使用導入的函數
+            // 確保 guessedSongs 存在
+            if (!game.guessedSongs) {
+                game.guessedSongs = new Set();
+            }
+            const isGameComplete = guessRhythmGame.checkGameComplete(game.songs, game.revealedLetters, game.guessedSongs);
             if (isGameComplete) {
                 game.isComplete = true;
             }
@@ -107,7 +113,6 @@ async function handleGameMessage(message, gameId, game) {
             
             if (remainingWrongGuesses <= 0) {
                 // 遊戲失敗
-                game.isComplete = true;
                 const embed = new EmbedBuilder()
                     .setColor(0xFF0000)
                     .setTitle('💥 Salt 說遊戲結束了にゃ！')
@@ -120,6 +125,8 @@ async function handleGameMessage(message, gameId, game) {
                     .setFooter({ text: 'Salt 說下次再加油にゃ～' })
                     .setTimestamp();
                 
+                // 標記遊戲為完成並刪除
+                game.isComplete = true;
                 guessRhythmGame.activeGames.delete(gameId);
                 await message.reply({ embeds: [embed] });
                 return;
@@ -144,7 +151,11 @@ async function handleGameMessage(message, gameId, game) {
         setTimeout(async () => {
             try {
                 if (!game.isComplete) {
-                    const gameEmbed = guessRhythmGame.createGameEmbed(gameId, game.songs, game.revealedLetters, game.wrongLetters, game.maxWrongGuesses - game.wrongLetters.size);
+                    // 確保 guessedSongs 存在
+                    if (!game.guessedSongs) {
+                        game.guessedSongs = new Set();
+                    }
+                    const gameEmbed = guessRhythmGame.createGameEmbed(gameId, game.songs, game.revealedLetters, game.wrongLetters, game.maxWrongGuesses - game.wrongLetters.size, game.guessedSongs);
                     const components = guessRhythmGame.createGameComponents(gameId);
                     await message.channel.send({ embeds: [gameEmbed], components: components });
                 }
@@ -162,95 +173,4 @@ async function handleGameMessage(message, gameId, game) {
     }
 }
 
-// 輔助函數
-function createGameEmbed(gameId, songs, revealedLetters, wrongLetters, remainingWrongGuesses) {
-    const { EmbedBuilder } = require('discord.js');
-    
-    const embed = new EmbedBuilder()
-        .setColor(remainingWrongGuesses > 3 ? 0x00FF00 : remainingWrongGuesses > 1 ? 0xFFFF00 : 0xFF0000)
-        .setTitle('🎡 Salt 的 maimai DX 歌曲猜字遊戲にゃ')
-        .setDescription('Salt 從 maimai DX 選了 5 首歌曲，猜字母來揭開歌名吧にゃ！');
-
-    // 顯示所有歌曲的遮蔽狀態
-    let songsDisplay = '';
-    songs.forEach((song, index) => {
-        const maskedName = createMaskedSongName(song.name, revealedLetters);
-        const genreEmoji = getGenreEmoji(song.genre);
-        songsDisplay += `${genreEmoji} **${index + 1}.** \`${maskedName}\` *(${song.genre || 'maimai DX'})*\n`;
-    });
-
-    embed.addFields(
-        {
-            name: '🎼 歌曲列表',
-            value: songsDisplay,
-            inline: false
-        }
-    );
-
-    // 顯示已猜過的字母
-    if (revealedLetters.size > 0) {
-        embed.addFields({
-            name: '✅ 正確字母',
-            value: Array.from(revealedLetters).map(letter => `\`${letter.toUpperCase()}\``).join(' '),
-            inline: true
-        });
-    }
-
-    if (wrongLetters.size > 0) {
-        embed.addFields({
-            name: '❌ 錯誤字母',
-            value: Array.from(wrongLetters).map(letter => `\`${letter.toUpperCase()}\``).join(' '),
-            inline: true
-        });
-    }
-
-    embed.addFields({
-        name: '📊 遊戲狀態',
-        value: `剩餘錯誤機會: ${remainingWrongGuesses} 次\n遊戲ID: \`${gameId}\`\n\n**如何遊玩**: 直接在頻道中輸入字母來猜測！\n**特殊指令**: 輸入 \`提示\` 獲得提示，輸入 \`放棄\` 結束遊戲`,
-        inline: false
-    });
-
-    embed.setFooter({ 
-        text: 'Salt 說：直接在頻道中輸入字母猜測，或用 /submit-song 猜完整歌名にゃ'
-    })
-    .setTimestamp();
-
-    return embed;
-}
-
-function createMaskedSongName(songName, revealedLetters) {
-    return songName
-        .toUpperCase()
-        .split('')
-        .map(char => {
-            if (char === ' ') {
-                return ' ';
-            } else if (revealedLetters.has(char.toLowerCase()) || revealedLetters.has(char.toUpperCase())) {
-                return char;
-            } else if (/[A-Za-z]/.test(char)) {
-                return '_';
-            } else {
-                // 數字和特殊符號直接顯示
-                return char;
-            }
-        })
-        .join('');
-}
-
-function getGenreEmoji(genre) {
-    const genreEmojis = {
-        'GAME & VARIETY': '🎮',
-        'POPS & ANIME': '📺',
-        'niconico & VOCALOID': '🎤',
-        'ORIGINAL & JOYPOLIS': '🎡',
-        'VARIETY': '🎵'
-    };
-    return genreEmojis[genre] || '🎵';
-}
-
-function checkGameComplete(songs, revealedLetters) {
-    return songs.every(song => {
-        const maskedName = createMaskedSongName(song.name, revealedLetters);
-        return !maskedName.includes('_');
-    });
-}
+// 使用 guess-rhythm-song.js 中的輔助函數

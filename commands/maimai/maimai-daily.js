@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ApplicationIntegrationType, InteractionContextType } = require('discord.js');
 const { getMaimaiSongs, getRandomSong, formatConstant } = require('../../utils/maimaiApi');
 
 module.exports = {
@@ -15,7 +15,9 @@ module.exports = {
                     { name: '🌙 夜戰 (Lv.12-14 高手專區)', value: 'night' },
                     { name: '💀 地獄 (Lv.14+ 頂尖挑戰)', value: 'hell' },
                     { name: '🎲 隨機 (全難度)', value: 'random' }
-                )),
+                ))
+        .setIntegrationTypes([ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall])
+        .setContexts([InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel]),
     async execute(interaction) {
         await interaction.deferReply();
         

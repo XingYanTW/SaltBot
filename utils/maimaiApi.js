@@ -91,7 +91,7 @@ function convertSongData(apiSong) {
     const difficulties = ['bas', 'adv', 'exp', 'mas', 'remas', 'dx_bas', 'dx_adv', 'dx_exp', 'dx_mas', 'dx_remas'];
     
     for (const diff of difficulties) {
-        let levelKey, constantKey, notesKey;
+        let levelKey, constantKey, notesKey, designerKey;
         
         // DX 譜面的欄位格式不同
         if (diff.startsWith('dx_')) {
@@ -99,16 +99,19 @@ function convertSongData(apiSong) {
             levelKey = `dx_lev_${diff.slice(3)}`; // dx_lev_bas, dx_lev_adv, etc.
             constantKey = `${levelKey}_i`;
             notesKey = `${levelKey}_notes`;
+            designerKey = `${levelKey}_designer`;
         } else {
             levelKey = `lev_${diff}`;
             constantKey = `${levelKey}_i`;
             notesKey = `${levelKey}_notes`;
+            designerKey = `${levelKey}_designer`;
         }
         
         if (apiSong[levelKey]) {
             let level = apiSong[levelKey];
             let constant = apiSong[constantKey] || null;
             let notes = apiSong[notesKey] || null;
+            let noteDesigner = apiSong[designerKey] || null;
             
             // 處理等級格式 (如 "13+" -> 13.7)
             const numLevel = parseFloat(level.toString().replace('+', '.7'));
@@ -128,7 +131,8 @@ function convertSongData(apiSong) {
                 level: level,
                 levelNum: numLevel,
                 constant: parsedConstant,
-                notes: notes ? parseInt(notes) : null
+                notes: notes ? parseInt(notes) : null,
+                noteDesigner: noteDesigner
             });
         }
     }

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ApplicationIntegrationType, InteractionContextType } = require('discord.js');
 const { getMaimaiSongs, searchSongs, formatConstant } = require('../../utils/maimaiApi');
 
 module.exports = {
@@ -17,7 +17,9 @@ module.exports = {
                     { name: '🎵 歌曲名稱', value: 'title' },
                     { name: '🎤 藝術家', value: 'artist' },
                     { name: '🔍 全部', value: 'all' }
-                )),
+                ))
+        .setIntegrationTypes([ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall])
+        .setContexts([InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel]),
     async execute(interaction) {
         await interaction.deferReply();
         

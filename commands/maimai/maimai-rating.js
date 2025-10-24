@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ApplicationIntegrationType, InteractionContextType } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,7 +19,9 @@ module.exports = {
         .addBooleanOption(option =>
             option.setName('dx')
                 .setDescription('是 DX 譜面嗎にゃ？')
-                .setRequired(false)),
+                .setRequired(false))
+        .setIntegrationTypes([ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall])
+        .setContexts([InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel]),
     async execute(interaction) {
         const constant = interaction.options.getNumber('constant');
         const achievement = interaction.options.getNumber('achievement');

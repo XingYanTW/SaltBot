@@ -1,10 +1,12 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ApplicationIntegrationType, InteractionContextType } = require('discord.js');
 const { getMaimaiSongs, getGameStats } = require('../../utils/maimaiApi');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('maimai-info')
-        .setDescription('Salt 來介紹 maimai DX 的小知識にゃ'),
+        .setDescription('Salt 來介紹 maimai DX 的小知識にゃ')
+        .setIntegrationTypes([ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall])
+        .setContexts([InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel]),
     async execute(interaction) {
         await interaction.deferReply();
         

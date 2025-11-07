@@ -763,7 +763,7 @@ async function generateRankingImage(data, interaction, progressMessages, serverC
 
     // 繪製標題文字 - 根據伺服器選擇顯示不同標題
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 15px "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, "ＭＳ Ｐゴシック", "MS P Gothic", sans-serif';
+    ctx.font = 'bold 15px "メイリオ", Meiryo, "ＭＳ Ｐゴシック", "MS P Gothic", sans-serif';
     ctx.textAlign = 'left';
     
     const titleText = serverChoice === 'jp' 
@@ -772,7 +772,7 @@ async function generateRankingImage(data, interaction, progressMessages, serverC
     ctx.fillText(titleText, titleX, currentY + 5);
 
     // 更新時間 - f_11樣式 (11px) - 右下角
-    ctx.font = 'bold 12px "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, sans-serif';
+    ctx.font = 'bold 12px "メイリオ", Meiryo, sans-serif';
     ctx.fillStyle = '#fff';
     const currentDate = new Date().toLocaleString('ja-JP', {
         year: 'numeric',
@@ -827,7 +827,7 @@ async function generateRankingImage(data, interaction, progressMessages, serverC
             currentY += 14.4;
             ctx.save();
             ctx.fillStyle = 'white';
-            ctx.font = 'bold 12px "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, sans-serif';
+            ctx.font = 'bold 12px "メイリオ", Meiryo, sans-serif';
             ctx.textAlign = 'right';
             const qualifyText = 'ここまでの方は全国決勝大会に出場する権利が与えられます。';
             ctx.fillText(qualifyText, containerX + containerWidth - 15, currentY);
@@ -853,7 +853,7 @@ async function generateRankingImage(data, interaction, progressMessages, serverC
             currentY += 14.4;
             ctx.save();
             ctx.fillStyle = 'white';
-            ctx.font = 'bold 12px "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, sans-serif';
+            ctx.font = 'bold 12px "メイリオ", Meiryo, sans-serif';
             ctx.textAlign = 'right';
             const qualifyText = 'Players up to here, will have the rights to join the International Ver.';
             ctx.fillText(qualifyText, containerX + containerWidth - 15, currentY);
@@ -884,7 +884,7 @@ async function generateRankingImage(data, interaction, progressMessages, serverC
             currentY += 14.4;
             ctx.save();
             ctx.fillStyle = 'white';
-            ctx.font = 'bold 12px "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, sans-serif';
+            ctx.font = 'bold 12px "メイリオ", Meiryo, sans-serif';
             ctx.textAlign = 'right';
             const lcqText = 'ここまでの方はLCQ（最終予選）に出場する権利が与えられます。';
             ctx.fillText(lcqText, containerX + containerWidth - 15, currentY);
@@ -1026,7 +1026,7 @@ async function drawMaimaiStyleRow(ctx, player, y, width, height, isTopThree) {
     const nameY = innerY + 20 + 15; // p_t_20 + f_15行高
 
     ctx.fillStyle = '#000';
-    ctx.font = '15px "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, "ＭＳ Ｐゴシック", sans-serif';
+    ctx.font = '15px "メイリオ", Meiryo, "ＭＳ Ｐゴシック", sans-serif';
     ctx.textAlign = 'left';
     const playerName = player.playerName || 'Unknown';
 
@@ -1064,7 +1064,7 @@ async function drawMaimaiStyleRow(ctx, player, y, width, height, isTopThree) {
 
         // 時間文字 - font-size: 10px; color: #fff; line-height: 11px;
         ctx.fillStyle = '#fff';
-        ctx.font = '10px "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, sans-serif';
+        ctx.font = '10px "メイリオ", Meiryo, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(player.dateTime, dateX + dateBlockWidth / 2, dateY + dateBlockHeight / 2 + 4);
     }
@@ -1076,12 +1076,12 @@ async function drawMaimaiStyleRow(ctx, player, y, width, height, isTopThree) {
 
     // 達成率 - f_16 f_b (16px粗體)
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 16px "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, sans-serif';
+    ctx.font = 'bold 16px "メイリオ", Meiryo, sans-serif';
     ctx.textAlign = 'right'; // t_r 文字右對齊
     ctx.fillText(player.percentage || '--', scoreX, percentageY);
 
     // 分數 - f_14 較小字體，灰色
-    ctx.font = '14px "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, sans-serif';
+    ctx.font = '14px "メイリオ", Meiryo, sans-serif';
     ctx.fillStyle = '#000'; // 使用官方灰色 #747474
     const scoreY = percentageY + 16; // l_h_10 行高調整
     ctx.fillText(player.scoreFormatted || player.score || '--', scoreX, scoreY);
@@ -1183,7 +1183,7 @@ async function drawRankingImages(ctx, player, x, y, width, height) {
 // 繪製排名文字（備用方案）
 function drawRankText(ctx, rank, x, y, width, height) {
     ctx.fillStyle = '#000';
-    ctx.font = 'bold 18px "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ Pro W3", "メイリオ", Meiryo, "ＭＳ Ｐゴシック", sans-serif';
+    ctx.font = 'bold 18px "メイリオ", Meiryo, "ＭＳ Ｐゴシック", sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(rank, x + width / 2, y + height / 2 + 6);
 }
